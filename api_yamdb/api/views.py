@@ -1,9 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters, generics
+from rest_framework import viewsets, filters
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+
 
 from .serializer import UserSerializer
 

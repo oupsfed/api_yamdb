@@ -137,8 +137,6 @@ def get_token(request):
                     status.HTTP_400_BAD_REQUEST)
 
 
-
-
 class ListCreateDeleteViewSet(mixins.ListModelMixin,
                               mixins.CreateModelMixin,
                               mixins.DestroyModelMixin,
@@ -151,11 +149,9 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     serializer_class = CategorySerializer
     permission_classes = (UserPermission,)
     filter_backends = [filters.SearchFilter]
-    search_fields = ('=category__username',)
-    pagination_class = LimitOffsetPagination
-
-    def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+    search_fields = ('name',)
+    pagination_class = PageNumberPagination
+    lookup_field = 'slug'
 
 
 class GenreViewSet(ListCreateDeleteViewSet):

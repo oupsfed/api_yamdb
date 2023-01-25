@@ -3,7 +3,6 @@ from rest_framework.exceptions import APIException
 from rest_framework import status
 
 
-
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         # if request.method == 'PUT':
@@ -38,9 +37,9 @@ class UserPermission(permissions.BasePermission):
         if view.action in ['list', 'retrieve']:
             return True
         elif view.action in ['create', 'update', 'partial_update', 'destroy']:
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 raise GenericAPIException(detail="no auth", status_code=401)
-            if not request.user.is_admin():
+            if not (request.user.role == 'admin' or request.user.is_superuser):
                 raise GenericAPIException(detail="not admin", status_code=403)
             return True
 

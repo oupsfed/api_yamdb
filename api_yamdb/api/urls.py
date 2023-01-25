@@ -4,14 +4,14 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
 )
 
-from .views import UserViewSet
+
+from .views import UserViewSet, auth, get_token
 
 router = routers.SimpleRouter()
 router.register('users', UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('auth/token/',
-         TokenObtainPairView.as_view(),
-         name='token_obtain_pair'),
+    path('auth/signup/', auth, name='signup'),
+    path('auth/token/', get_token, name='token'),
 ]

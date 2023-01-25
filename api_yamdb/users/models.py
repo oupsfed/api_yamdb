@@ -9,6 +9,10 @@ CHOICES = (
 
 
 class User(AbstractUser):
+    username = models.SlugField(max_length=150, unique=True)
+    password = models.CharField(
+        max_length=50,
+        blank=False)
     bio = models.TextField(
         'Биография',
         blank=True,

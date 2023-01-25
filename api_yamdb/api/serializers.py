@@ -1,9 +1,21 @@
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import (ModelSerializer,
-                                        SlugRelatedField)
+                                        SlugRelatedField,
+                                        SerializerMethodField)
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Review, Comment
+from reviews.models import Comment, Review
+
+
+class TitleSerializer(ModelSerializer):
+    raiting = SerializerMethodField()
+
+    def get_raiting(self, obj):
+        reviews_list = obj.reviews.all()
+        raiting = 0
+        for review in reviews_list:
+            raiting += review.score
+        return raiting
 
 
 class ReviewSerializer(ModelSerializer):

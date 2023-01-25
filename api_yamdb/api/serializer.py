@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=254,
                                    required=True)
     username = serializers.RegexField(max_length=150,
-                                      regex=r'^[\w.@+-]', )
+                                      regex=r'^[\w.@+-]')
 
     class Meta:
         model = User
@@ -22,8 +22,13 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-        read_only_fields = ('role',)
 
+    # def validate(self, data):
+    #     if data['email']:
+    #         if User.objects.filter(email=data['email']).exists():
+    #             raise serializers.ValidationError(
+    #                 'Имя не может быть me!')
+    #     return data
 
 class AuthSerializer(serializers.ModelSerializer):
     username = serializers.RegexField(max_length=150,

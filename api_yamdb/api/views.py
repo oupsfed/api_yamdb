@@ -2,11 +2,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import permission_classes
-from rest_framework import viewsets, filters, status, mixins, permissions
+from rest_framework.decorators import permission_classes, action
+from rest_framework import viewsets, filters, status
 from rest_framework.decorators import api_view
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -25,11 +25,52 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
     lookup_field = 'username'
 
-    def get_object(self):
-        if self.kwargs['username'] == 'me':
-            print(self.request.path)
-            obj = get_object_or_404(User, pk=self.request.user.pk)
-            return obj
+    def update(self, request, *args, **kwargs, ):
+        if request.method == 'PUT':
+            return Response('Метод PUT не разрешен!',
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        user = User.objects.filter(username=kwargs['username']).get()
+        serializer = self.serializer_class(
+            user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data.pop('role', None)
+        serializer.update(user, serializer.validated_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if (User.objects.filter(email=request.data['email']).exists()
+                or User.objects.filter(
+                    username=request.data['username']).exists()):
+            return Response(
+                'Такой email уже существует',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        methods=['GET', 'PATCH'],
+        permission_classes=(IsAuthenticated,),
+        detail=False,
+        url_path='me',
+    )
+    def user_info(self, request):
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.serializer_class(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data.pop('role', None)
+        serializer.update(request.user, serializer.validated_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

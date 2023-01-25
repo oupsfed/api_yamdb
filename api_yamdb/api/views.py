@@ -173,15 +173,3 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ('=genre__slug',)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-    def get_retrieve(self):
-        title_id = self.kwargs.get('title_id')
-        return get_object_or_404(Title, pk=title_id)
-
-    def perform_update(self, serializer):
-        serializer.save()
-
-    def destroy(self, request, *args, **kwargs):
-        return super(TitleViewSet, self).destroy(request, *args, **kwargs)

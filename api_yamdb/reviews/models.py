@@ -21,9 +21,9 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField('titles name', help_text='write titles name', max_length=256)
                             #validators=[validate_not_empty])
-    year = models.DateField('titles year', auto_now_add=True)
+    year = models.IntegerField('titles year')
     description = models.TextField()
-    rating = models.IntegerField()
+    rating = models.IntegerField(blank=True, null=True)
     category = models.ForeignKey(Category,
                                  blank=True,
                                  null=True,
@@ -32,16 +32,10 @@ class Title(models.Model):
                                  on_delete=models.SET_NULL,
                                  help_text='CategoryTitle')
     genre = models.ManyToManyField(Genre,
-                              blank=True,
-                              null=True,
-                              related_name='title',
-                              verbose_name='genre',
-                              help_text='GenreTitle')
-    image = models.ImageField(
-        'image',
-        upload_to='title/',
-        blank=True
-    )
+                                   blank=True,
+                                   related_name='title',
+                                   verbose_name='genre',
+                                   help_text='GenreTitle')
 
     class Meta:
         #ordering = ['-year']

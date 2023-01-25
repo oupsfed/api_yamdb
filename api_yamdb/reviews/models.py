@@ -31,18 +31,14 @@ class Title(models.Model):
                                  null=True,
                                  related_name='title',
                                  verbose_name='category',
-                                 help_text='CategoryTitle')
+                                 help_text='CategoryTitle',
+                                 on_delete=models.SET_NULL)
     genre = models.ManyToManyField(Genre,
                               blank=True,
                               null=True,
                               related_name='title',
                               verbose_name='genre',
                               help_text='GenreTitle')
-    image = models.ImageField(
-        'image',
-        upload_to='title/',
-        blank=True
-    )
 
     class Meta:
         #ordering = ['-year']

@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework import mixins
 
 from .permissions import IsAdmin
-from .serializer import UserSerializer, AuthSerializer, TokenSerializer
+from .serializers import UserSerializer, AuthSerializer, TokenSerializer
 from reviews.models import Category, Genre
 from .permissions import UserPermission
 from .serializers import CategorySerializer, GenreSerializer

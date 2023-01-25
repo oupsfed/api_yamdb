@@ -14,6 +14,9 @@ from rest_framework import mixins
 from .permissions import IsAdmin
 from .serializer import UserSerializer, AuthSerializer, TokenSerializer
 from reviews.models import Category, Genre
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
+from reviews.models import Category, Genre, Title
 from .permissions import UserPermission
 from .serializers import CategorySerializer, GenreSerializer
 from .serializers import TitleSerializer
@@ -132,7 +135,7 @@ def get_token(request):
 
     return Response({"message": "неверный код подтверждения."},
                     status.HTTP_400_BAD_REQUEST)
-                    
+
 
 
 
@@ -149,6 +152,7 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     permission_classes = (UserPermission,)
     filter_backends = [filters.SearchFilter]
     search_fields = ('=category__username',)
+    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         return serializer.save(user=self.request.user)
@@ -159,8 +163,30 @@ class GenreViewSet(ListCreateDeleteViewSet):
     serializer_class = GenreSerializer
     permission_classes = (UserPermission,)
     filter_backends = [filters.SearchFilter]
-    search_fields = ('=genre__username',)
+    search_fields = ('=genre__slug',)
+    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         return serializer.save(user=self.request.user)
 
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (UserPermission,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('=genre__slug',)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_retrieve(self):
+        title_id = self.kwargs.get('title_id')
+        return get_object_or_404(Title, pk=title_id)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        return super(TitleViewSet, self).destroy(request, *args, **kwargs)

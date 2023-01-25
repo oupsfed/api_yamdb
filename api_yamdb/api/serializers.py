@@ -18,6 +18,7 @@ class CategorySerializer(serializers.ModelSerializer):
                 'data not correct!')
         return data
 
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'slug')
@@ -34,8 +35,9 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = SlugRelatedField(slug_field='username', read_only=True, queryset=Category.objects.all())
-    genre = SlugRelatedField(slug_field='username', read_only=True, queryset=Genre.objects.all())
-     class Meta:
+    category = SlugRelatedField(slug_field='slug', read_only=True)  #, queryset=Category.objects.all())
+    genre = SlugRelatedField(slug_field='slug', read_only=True)   #, queryset=Genre.objects.all())
+
+    class Meta:
         fields = '__all__'
         model = Title

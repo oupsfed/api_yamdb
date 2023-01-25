@@ -1,8 +1,5 @@
-#from email.headerregistry import Group
+
 from django.db import models
-
-
-#from .validators import validate_not_empty
 
 
 class Category(models.Model):
@@ -26,11 +23,13 @@ class Title(models.Model):
                             #validators=[validate_not_empty])
     year = models.DateField('titles year', auto_now_add=True)
     description = models.TextField()
+    rating = models.IntegerField()
     category = models.ForeignKey(Category,
                                  blank=True,
                                  null=True,
                                  related_name='title',
                                  verbose_name='category',
+                                 on_delete=models.SET_NULL,
                                  help_text='CategoryTitle')
     genre = models.ManyToManyField(Genre,
                               blank=True,

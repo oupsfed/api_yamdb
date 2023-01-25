@@ -9,15 +9,33 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'slug')
         model = Category
 
+    def validate(self, data):
+        if data['name'] == '' or type(data['name']) != str:
+            raise serializers.ValidationError(
+                'data not correct!')
+        if data['slug'] == '' or type(data['slug']) != str:
+            raise serializers.ValidationError(
+                'data not correct!')
+        return data
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'slug')
         model = Category
 
+    def validate(self, data):
+        if data['name'] == '' or type(data['name']) != str:
+            raise serializers.ValidationError(
+                'data not correct!')
+        if data['slug'] == '' or type(data['slug']) != str:
+            raise serializers.ValidationError(
+                'data not correct!')
+        return data
 
-class PostSerializer(serializers.ModelSerializer):
-    #category = SlugRelatedField(slug_field='username', read_only=True)
-    class Meta:
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = SlugRelatedField(slug_field='username', read_only=True, queryset=Category.objects.all())
+    genre = SlugRelatedField(slug_field='username', read_only=True, queryset=Genre.objects.all())
+     class Meta:
         fields = '__all__'
-        model = Post
+        model = Title

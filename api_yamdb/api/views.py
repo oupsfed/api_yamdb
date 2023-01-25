@@ -9,9 +9,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework import mixins
 
 from .permissions import IsAdmin
 from .serializer import UserSerializer, AuthSerializer, TokenSerializer
+from reviews.models import Category, Genre
+from .permissions import UserPermission
+from .serializers import CategorySerializer, GenreSerializer
+from .serializers import TitleSerializer
 
 User = get_user_model()
 
@@ -127,3 +132,35 @@ def get_token(request):
 
     return Response({"message": "неверный код подтверждения."},
                     status.HTTP_400_BAD_REQUEST)
+                    
+
+
+
+class ListCreateDeleteViewSet(mixins.ListModelMixin,
+                              mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
+                              viewsets.GenericViewSet):
+    pass
+
+
+class CategoryViewSet(ListCreateDeleteViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (UserPermission,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('=category__username',)
+
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+
+
+class GenreViewSet(ListCreateDeleteViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (UserPermission,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('=genre__username',)
+
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+

@@ -6,7 +6,6 @@ from reviews.models import Category, Genre, Title
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        #fields = ('id', 'name', 'slug')
         exclude = ['id']
         model = Category
 
@@ -22,7 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('id', 'name', 'slug')
+        exclude = ['id']
         model = Genre
 
     def validate(self, data):

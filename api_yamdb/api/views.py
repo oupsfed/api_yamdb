@@ -159,11 +159,10 @@ class GenreViewSet(ListCreateDeleteViewSet):
     serializer_class = GenreSerializer
     permission_classes = (UserPermission,)
     filter_backends = [filters.SearchFilter]
-    search_fields = ('=genre__slug',)
-    pagination_class = LimitOffsetPagination
+    search_fields = ('name',)
+    pagination_class = PageNumberPagination
+    lookup_field = 'slug'
 
-    def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
 
 
 class TitleViewSet(viewsets.ModelViewSet):

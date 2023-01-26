@@ -4,10 +4,11 @@ from rest_framework.routers import SimpleRouter
 from api.views import (auth, CommentViewSet,
                        get_token, ReviewViewSet, UserViewSet)
 
+from .views import UserViewSet, auth, get_token, CategoryViewSet, GenreViewSet, TitleViewSet
+
 
 router = SimpleRouter()
 router.register('users', UserViewSet)
-router.register('titles', UserViewSet)
 router.register(
     r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet,
     basename='reviews')
@@ -16,6 +17,9 @@ router.register(
     CommentViewSet,
     basename='comments'
 )
+router.register('categories', CategoryViewSet)
+router.register('genres', GenreViewSet)
+router.register('titles', TitleViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

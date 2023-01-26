@@ -36,8 +36,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True, required=False)
-    genre = GenreSerializer(read_only=True, required=False, many = True)
+    categories = CategorySerializer(required=False)
+    genre = GenreSerializer(required=False, many = True)
 
     class Meta:
         fields = '__all__'
@@ -68,12 +68,15 @@ class TitleSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        category_slug = None
-        if 'category' in self.initial_data:
-            category_slug = validated_data.pop('category')
-        genre_slugs = []
-        if 'genre' in self.initial_data:
-            genre_slugs = validated_data.pop('genre')
+        categories = validated_data.pop('category')
+        genries = validated_data.pop('genre')
         title = Title.objects.create(**validated_data)
-
+        for category in categories:
+            current_category, status = Category.objects.get_or_create(
+                **category)
+            Title.objects.create(category=current_category, title=title)
+        for genre in genries:
+            current_genre, status = Genre.objects.get_or_create(
+                **genre)
+            Title.objects.create(category=current_genre, title=title)
         return title

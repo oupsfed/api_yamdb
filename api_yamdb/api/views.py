@@ -146,16 +146,21 @@ class CategoryViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
     def retrieve(self, request, *args, **kwargs):
-        return Response({"message": "неверный код подтверждения."},
+        return Response({'Нельзя смотреть определенные категории'},
                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GenreViewSet(ListCreateDeleteViewSet):
+class GenreViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (UserPermission,)
-    filter_backends = [filters.SearchFilter]
-    search_fields = ('=genre__username',)
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
-    def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+    def retrieve(self, request, *args, **kwargs):
+        return Response({'Нельзя смотреть определенные категории'},
+                        status.HTTP_405_METHOD_NOT_ALLOWED)

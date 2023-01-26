@@ -18,17 +18,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('id', 'name', 'slug')
-        model = Category
+        fields = ('name', 'slug')
+        model = Genre
 
-    def validate(self, data):
-        if data['name'] == '' or type(data['name']) != str:
-            raise serializers.ValidationError(
-                'data not correct!')
-        if data['slug'] == '' or type(data['slug']) != str:
-            raise serializers.ValidationError(
-                'data not correct!')
-        return data
+
 
 
 class TitleSerializer(serializers.Serializer):

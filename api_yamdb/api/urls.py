@@ -5,11 +5,12 @@ from rest_framework_simplejwt.views import (
 )
 
 
-from .views import UserViewSet, auth, get_token, CategoryViewSet
+from .views import UserViewSet, auth, get_token, CategoryViewSet, GenreViewSet
 
 router = routers.SimpleRouter()
 router.register('users', UserViewSet)
 router.register('categories', CategoryViewSet)
+router.register('genres', GenreViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

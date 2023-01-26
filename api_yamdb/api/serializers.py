@@ -13,17 +13,8 @@ from reviews.models import Category, Genre, Title
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
         model = Category
-
-    def validate(self, data):
-        if data['name'] == '' or type(data['name']) != str:
-            raise serializers.ValidationError(
-                'data not correct!')
-        if data['slug'] == '' or type(data['slug']) != str:
-            raise serializers.ValidationError(
-                'data not correct!')
-        return data
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:

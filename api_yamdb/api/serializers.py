@@ -47,7 +47,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['name'] == '' or type(data['name']) != str:
             raise serializers.ValidationError(
-                'name not correct!'
+                'name not correct!')
         if data['year'] == '' or type(data['year']) != int:
             raise serializers.ValidationError(
                 'year not correct!')

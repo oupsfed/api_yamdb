@@ -10,22 +10,22 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.viewsets import ModelViewSet
 
 from .filters import TitleFilter
-from .permissions import IsAdmin, IsAdminOrReadOnly, UserPermission, IsAdminOrReadOnlyTitle
-from .serializers import UserSerializer, AuthSerializer, TokenSerializer, CreateTitleSerializer
-from reviews.models import Category, Genre, Title
-from .permissions import UserPermission
-from .serializers import CategorySerializer, GenreSerializer
-from api.permissions import IsAdminAuthorOrReadOnly
-from api.serializers import (AuthSerializer,
-                             CommentSerializer,
-                             ReviewSerializer,
-                             TitleSerializer,
-                             TokenSerializer,
-                             UserSerializer)
-from reviews.models import Review, Title
+from .permissions import (IsAdminAuthorOrReadOnly,
+                          IsAdmin,
+                          IsAdminOrReadOnly,
+                          IsAdminOrReadOnlyTitle)
+from .serializers import (AuthSerializer,
+                          CommentSerializer,
+                          ReviewSerializer,
+                          TitleSerializer,
+                          CreateTitleSerializer,
+                          TokenSerializer,
+                          UserSerializer,
+                          GenreSerializer,
+                          CategorySerializer)
+from reviews.models import Review, Title, Category, Genre
 
 User = get_user_model()
 
@@ -51,7 +51,9 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response('Метод PUT не разрешен!',
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         user = User.objects.get(username=kwargs['username'])
-        serializer = self.serializer_class(user, data=request.data, partial=True)
+        serializer = self.serializer_class(user,
+                                           data=request.data,
+                                           partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.update(user, serializer.validated_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -186,13 +188,15 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         title = Title.objects.get(pk=kwargs['pk'])
-        serializer = CreateTitleSerializer(title, data=request.data, partial=True)
+        serializer = CreateTitleSerializer(title,
+                                           data=request.data,
+                                           partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.update(title, serializer.validated_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ReviewViewSet(ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminAuthorOrReadOnly)
     pagination_class = PageNumberPagination
@@ -214,7 +218,7 @@ class ReviewViewSet(ModelViewSet):
         )
 
 
-class CommentViewSet(ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminAuthorOrReadOnly)
 

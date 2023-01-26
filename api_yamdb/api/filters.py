@@ -13,3 +13,4 @@ class TitleFilter(filters.FilterSet):
         model = Title
         fields = ['genre', 'category', 'year', 'name']
 
+

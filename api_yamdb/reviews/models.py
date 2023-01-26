@@ -7,9 +7,6 @@ SCORES = ((1, 1), (2, 2), (3, 3), (4, 4),
           (9, 9), (10, 10))
 
 
-# from .validators import validate_not_empty
-
-
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)

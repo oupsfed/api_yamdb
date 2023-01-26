@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -37,8 +38,6 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True, required=False)
     genre = GenreSerializer(read_only=True, required=False, many = True)
-    #category = SlugRelatedField(slug_field='slug', read_only=True)  #, queryset=Category.objects.all())
-    #genre = SlugRelatedField(slug_field='slug', read_only=True, many=True)   #, queryset=Genre.objects.all())
 
     class Meta:
         fields = '__all__'
@@ -46,6 +45,26 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
     def validate(self, data):
+        if data['name'] == '' or type(data['name']) != str:
+            raise serializers.ValidationError(
+                'name not correct!'
+        if data['year'] == '' or type(data['year']) != int:
+            raise serializers.ValidationError(
+                'year not correct!')
+        if data['year'] >= datetime.now():
+            raise serializers.ValidationError('Check the year')
+        if data['rating'] == '' or type(data['rating']) != int:
+            raise serializers.ValidationError(
+                'rating not correct!')
+        if data['description'] == '' or type(data['description']) != str:
+            raise serializers.ValidationError(
+                'description not correct!')
+        if data['category'] == '':
+            raise serializers.ValidationError(
+                'category not correct!')
+        if data['genre'] == '':
+            raise serializers.ValidationError(
+                'genre not correct!')
         return data
 
     def create(self, validated_data):

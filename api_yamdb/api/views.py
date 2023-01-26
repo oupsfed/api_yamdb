@@ -13,7 +13,8 @@ from rest_framework import mixins
 
 from .permissions import IsAdmin
 from .serializer import UserSerializer, AuthSerializer, TokenSerializer
-from reviews.models import Category, Genre
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
 from reviews.models import Category, Genre, Title
@@ -164,12 +165,11 @@ class GenreViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
 
 
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (UserPermission,)
-    pagination_class = LimitOffsetPagination
-    filter_backends = [filters.SearchFilter]
-    search_fields = ('=genre__slug',)
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ('category', 'genre', 'name', 'year')
 

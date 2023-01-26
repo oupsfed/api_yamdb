@@ -1,8 +1,5 @@
 from django.db import models
 
-# from django.contrib.auth import get_user_model
-from django.db import models
-
 from users.models import User
 
 SCORES = ((1, 1), (2, 2), (3, 3), (4, 4),
@@ -11,15 +8,53 @@ SCORES = ((1, 1), (2, 2), (3, 3), (4, 4),
 
 
 class Category(models.Model):
-    pass
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    def __str__(self):
+        return self.name
 
 
 class Genre(models.Model):
-    pass
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
-    pass
+    name = models.CharField(
+        'titles name',
+        help_text='write titles name',
+        max_length=256
+    )
+    year = models.DateField('titles year', auto_now_add=True)
+    description = models.TextField()
+    category = models.ForeignKey(
+        Category,
+        blank=True,
+        null=True,
+        related_name='title',
+        verbose_name='category',
+        help_text='CategoryTitle',
+        on_delete=models.CASCADE
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        blank=True,
+        null=True,
+        related_name='title',
+        verbose_name='genre',
+        help_text='GenreTitle'
+    )
+
+    class Meta:
+        verbose_name = 'title'
+        verbose_name_plural = 'titles'
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):

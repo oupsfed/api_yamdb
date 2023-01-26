@@ -11,9 +11,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework import mixins
 
-from .permissions import IsAdmin
-from .serializer import UserSerializer, AuthSerializer, TokenSerializer
-from reviews.models import Category, Genre
+from .permissions import IsAdmin, IsAdminOrReadOnly
+from .serializers import UserSerializer, AuthSerializer, TokenSerializer
+from reviews.models import Category, Genre, Title
 from .permissions import UserPermission
 from .serializers import CategorySerializer, GenreSerializer
 from .serializers import TitleSerializer
@@ -132,35 +132,43 @@ def get_token(request):
 
     return Response({"message": "неверный код подтверждения."},
                     status.HTTP_400_BAD_REQUEST)
-                    
 
 
-
-class ListCreateDeleteViewSet(mixins.ListModelMixin,
-                              mixins.CreateModelMixin,
-                              mixins.DestroyModelMixin,
-                              viewsets.GenericViewSet):
-    pass
-
-
-class CategoryViewSet(ListCreateDeleteViewSet):
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (UserPermission,)
-    filter_backends = [filters.SearchFilter]
-    search_fields = ('=category__username',)
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
-    def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+    def retrieve(self, request, *args, **kwargs):
+        return Response({'Нельзя смотреть определенные категории'},
+                        status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GenreViewSet(ListCreateDeleteViewSet):
+class GenreViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (UserPermission,)
-    filter_backends = [filters.SearchFilter]
-    search_fields = ('=genre__username',)
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
-    def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+    def retrieve(self, request, *args, **kwargs):
+        return Response({'Нельзя смотреть определенные категории'},
+                        status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+
 

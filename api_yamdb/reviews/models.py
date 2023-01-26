@@ -6,8 +6,8 @@ SCORES = ((1, 1), (2, 2), (3, 3), (4, 4),
           (5, 5), (6, 6), (7, 7), (8, 8),
           (9, 9), (10, 10))
 
-# from .validators import validate_not_empty
 
+# from .validators import validate_not_empty
 
 
 class Category(models.Model):
@@ -27,10 +27,9 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-
     name = models.CharField(max_length=256)
-    year = models.IntegerField(blank=True)
-    description = models.TextField()
+    year = models.IntegerField(null=True, blank=True)
+    description = models.TextField(blank=True)
     category = models.ForeignKey(Category,
                                  blank=True,
                                  null=True,

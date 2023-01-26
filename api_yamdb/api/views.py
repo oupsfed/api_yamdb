@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import permission_classes, action, api_view
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -11,8 +12,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.viewsets import ModelViewSet
 
-from .permissions import IsAdmin, IsAdminOrReadOnly, UserPermission
-from .serializers import UserSerializer, AuthSerializer, TokenSerializer
+from .filters import TitleFilter
+from .permissions import IsAdmin, IsAdminOrReadOnly, UserPermission, IsAdminOrReadOnlyTitle
+from .serializers import UserSerializer, AuthSerializer, TokenSerializer, CreateTitleSerializer
 from reviews.models import Category, Genre, Title
 from .permissions import UserPermission
 from .serializers import CategorySerializer, GenreSerializer
@@ -177,7 +179,22 @@ class GenreViewSet(ListCreateDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnlyTitle,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+
+    def create(self, request, *args, **kwargs):
+        serializer = CreateTitleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, *args, **kwargs):
+        title = Title.objects.get(pk=kwargs['pk'])
+        serializer = CreateTitleSerializer(title, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(title, serializer.validated_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(ModelViewSet):

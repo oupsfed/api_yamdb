@@ -71,15 +71,13 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(slug_field='slug',
-                                         queryset=Genre.objects.all(),
-                                         many=True)
-    category = serializers.SlugRelatedField(slug_field='slug',
-                                            queryset=Category.objects.all())
-    raiting = SerializerMethodField()
+    genre = GenreSerializer(required=False, many=True)
+    category = CategorySerializer()
+    rating = SerializerMethodField()
+    year = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'raiting')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating')
         model = Title
         validators = [
             UniqueTogetherValidator(
@@ -88,6 +86,38 @@ class TitleSerializer(serializers.ModelSerializer):
                 message='Данное произведение существует'
             )
         ]
+
+    def get_rating(self, obj):
+        # reviews_list = obj.reviews.all()
+        # raiting = 0
+        # for review in reviews_list:
+        #     raiting += review.score
+        # return raiting
+        pass
+
+
+class CreateTitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(slug_field='slug',
+                                         queryset=Genre.objects.all(),
+                                         many=True,
+                                         required=False)
+    category = serializers.SlugRelatedField(slug_field='slug',
+                                            queryset=Category.objects.all())
+    rating = SerializerMethodField()
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating')
+        model = Title
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Title.objects.all(),
+                fields=('name', 'year'),
+                message='Данное произведение существует'
+            )
+        ]
+
+    def get_rating(self, obj):
+        pass
 
     def create(self, validated_data):
         if 'genre' not in self.initial_data:
@@ -104,14 +134,6 @@ class TitleSerializer(serializers.ModelSerializer):
                     genre=current_genre, title=title
                 )
             return title
-
-    def get_raiting(self, obj):
-        # reviews_list = obj.reviews.all()
-        # raiting = 0
-        # for review in reviews_list:
-        #     raiting += review.score
-        # return raiting
-        pass
 
 
 class ReviewSerializer(ModelSerializer):

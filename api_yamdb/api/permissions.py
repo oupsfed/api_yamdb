@@ -17,7 +17,6 @@ class GenericAPIException(APIException):
 
 
 class UserPermission(BasePermission):
-
     def has_permission(self, request, view):
         if view.action in ['list', 'retrieve']:
             return True
@@ -41,7 +40,6 @@ class IsAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (request.user.role == 'admin'
                 or request.user.is_superuser)
-
 
 
 class IsAdminAuthorOrReadOnly(BasePermission):
@@ -70,18 +68,3 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return (request.user.role == 'admin'
                 or request.user.is_superuser)
-
-
-class UserPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if view.action in ['list', 'retrieve']:
-            return True
-        elif view.action in ['create', 'update', 'partial_update', 'destroy']:
-            if not request.user.is_authenticated():
-                raise GenericAPIException(detail="no auth", status_code=401)
-            if not request.user.is_admin():
-                raise GenericAPIException(detail="not admin", status_code=403)
-            return True
-
-        else:
-            return False

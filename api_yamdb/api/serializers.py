@@ -9,7 +9,6 @@ from rest_framework.serializers import (CurrentUserDefault,
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-
 from reviews.models import Category, Comment, Genre, Review, Title, GenreTitle
 
 User = get_user_model()
@@ -59,7 +58,6 @@ class TokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(max_length=512)
 
 
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
@@ -72,18 +70,16 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-
-
 class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(slug_field='slug',
                                          queryset=Genre.objects.all(),
                                          many=True)
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
-    rating = SerializerMethodField()
+    raiting = SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'raiting')
         model = Title
         validators = [
             UniqueTogetherValidator(
@@ -92,7 +88,7 @@ class TitleSerializer(serializers.ModelSerializer):
                 message='Данное произведение существует'
             )
         ]
-        
+
     def create(self, validated_data):
         if 'genre' not in self.initial_data:
             title = Title.objects.create(**validated_data)
@@ -108,14 +104,14 @@ class TitleSerializer(serializers.ModelSerializer):
                     genre=current_genre, title=title
                 )
             return title
-            
 
     def get_raiting(self, obj):
-        reviews_list = obj.reviews.all()
-        raiting = 0
-        for review in reviews_list:
-            raiting += review.score
-        return raiting
+        # reviews_list = obj.reviews.all()
+        # raiting = 0
+        # for review in reviews_list:
+        #     raiting += review.score
+        # return raiting
+        pass
 
 
 class ReviewSerializer(ModelSerializer):
@@ -134,7 +130,7 @@ class ReviewSerializer(ModelSerializer):
         #       queryset=Title.objects.all(),
         #       fields=('title', 'author'),
         #    )
-        #]
+        # ]
 
 
 class CommentSerializer(ModelSerializer):
@@ -145,7 +141,6 @@ class CommentSerializer(ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
-
 
 
 class UserSerializer(serializers.ModelSerializer):

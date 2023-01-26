@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.viewsets import ModelViewSet
 
-
 from .permissions import IsAdmin, IsAdminOrReadOnly, UserPermission
 from .serializers import UserSerializer, AuthSerializer, TokenSerializer
 from reviews.models import Category, Genre, Title
@@ -26,8 +25,14 @@ from api.serializers import (AuthSerializer,
                              UserSerializer)
 from reviews.models import Review, Title
 
-
 User = get_user_model()
+
+
+class ListCreateDeleteViewSet(mixins.ListModelMixin,
+                              mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
+                              viewsets.GenericViewSet):
+    pass
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -143,10 +148,7 @@ def get_token(request):
                     status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(ListCreateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -159,10 +161,7 @@ class CategoryViewSet(mixins.ListModelMixin,
                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GenreViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class GenreViewSet(ListCreateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -179,12 +178,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
-
-
-
-class TitleViewSet(ListCreateDeleteViewSet):
-    serializer_class = TitleSerializer
-    permission_classes = IsAuthenticatedOrReadOnly
 
 
 class ReviewViewSet(ModelViewSet):

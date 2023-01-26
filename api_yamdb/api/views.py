@@ -13,7 +13,7 @@ from rest_framework import mixins
 
 from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import UserSerializer, AuthSerializer, TokenSerializer
-from reviews.models import Category, Genre
+from reviews.models import Category, Genre, Title
 from .permissions import UserPermission
 from .serializers import CategorySerializer, GenreSerializer
 from .serializers import TitleSerializer
@@ -164,3 +164,11 @@ class GenreViewSet(mixins.ListModelMixin,
     def retrieve(self, request, *args, **kwargs):
         return Response({'Нельзя смотреть определенные категории'},
                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+
+

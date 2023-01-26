@@ -2,13 +2,14 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 User = get_user_model()
 
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, GenreTitle
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,10 +25,38 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 
-class TitleSerializer(serializers.Serializer):
-    category = SlugRelatedField(slug_field='username', queryset=Category.objects.all())
-    genre = SlugRelatedField(slug_field='username', queryset=Genre.objects.all())
+class TitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(slug_field='slug',
+                                         queryset=Genre.objects.all(),
+                                         many=True)
+    category = serializers.SlugRelatedField(slug_field='slug',
+                                            queryset=Category.objects.all())
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Title
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Title.objects.all(),
+                fields=('name', 'year'),
+                message='Данное произведение существует'
+            )
+        ]
 
+    def create(self, validated_data):
+        if 'genre' not in self.initial_data:
+            title = Title.objects.create(**validated_data)
+            return title
+        else:
+            genres = validated_data.pop('genre')
+            title = Title.objects.create(**validated_data)
+            for genre in genres:
+                current_genre = Genre.objects.get(
+                    slug=genre.slug
+                )
+                GenreTitle.objects.create(
+                    genre=current_genre, title=title
+                )
+            return title
 
 
 class UserSerializer(serializers.ModelSerializer):

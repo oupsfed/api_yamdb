@@ -1,6 +1,6 @@
 from datetime import datetime
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
+from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Title
 
@@ -37,7 +37,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(required=False)
-    genre = GenreSerializer(required=False, many = True)
+    genres = GenreSerializer(required=False, many=True)
 
     class Meta:
         fields = '__all__'
@@ -45,17 +45,18 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
     def validate(self, data):
+        return data
         if data['name'] == '' or type(data['name']) != str:
             raise serializers.ValidationError(
                 'name not correct!')
         if data['year'] == '' or type(data['year']) != int:
             raise serializers.ValidationError(
                 'year not correct!')
-        if data['year'] >= datetime.now():
-            raise serializers.ValidationError('Check the year')
-        if data['rating'] == '' or type(data['rating']) != int:
-            raise serializers.ValidationError(
-                'rating not correct!')
+        #if data['year'] >= datetime.now():
+        #    raise serializers.ValidationError('Check the year')
+        #if data['rating'] == '' or type(data['rating']) != int:
+        #    raise serializers.ValidationError(
+        #        'rating not correct!')
         if data['description'] == '' or type(data['description']) != str:
             raise serializers.ValidationError(
                 'description not correct!')
@@ -68,15 +69,14 @@ class TitleSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        categories = validated_data.pop('category')
-        genries = validated_data.pop('genre')
+        category_slug = validated_data.pop('category')
+        genre_slugs = validated_data.pop('genre')
         title = Title.objects.create(**validated_data)
-        for category in categories:
-            current_category, status = Category.objects.get_or_create(
-                **category)
-            Title.objects.create(category=current_category, title=title)
-        for genre in genries:
-            current_genre, status = Genre.objects.get_or_create(
-                **genre)
-            Title.objects.create(category=current_genre, title=title)
+        #current_category = get_object_or_404(Category, slug=category_slug)
+        #title.category = current_category
+        #title.save()
+        #for genre_slug in genre_slugs:
+        #    current_genre = get_object_or_404(Genre, slug=genre_slug)
+        #    title.genre.append(current_genre)
+        #    title.save()
         return title

@@ -2,21 +2,30 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import permission_classes, action
-from rest_framework import viewsets, filters, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes, action, api_view
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import mixins
+from rest_framework.viewsets import ModelViewSet
 
-from .permissions import IsAdmin, IsAdminOrReadOnly
+
+from .permissions import IsAdmin, IsAdminOrReadOnly, UserPermission
 from .serializers import UserSerializer, AuthSerializer, TokenSerializer
 from reviews.models import Category, Genre, Title
 from .permissions import UserPermission
 from .serializers import CategorySerializer, GenreSerializer
-from .serializers import TitleSerializer
+from api.permissions import IsAdminAuthorOrReadOnly
+from api.serializers import (AuthSerializer,
+                             CommentSerializer,
+                             ReviewSerializer,
+                             TitleSerializer,
+                             TokenSerializer,
+                             UserSerializer)
+from reviews.models import Review, Title
+
 
 User = get_user_model()
 
@@ -172,3 +181,50 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
 
 
+
+class TitleViewSet(ListCreateDeleteViewSet):
+    serializer_class = TitleSerializer
+    permission_classes = IsAuthenticatedOrReadOnly
+
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminAuthorOrReadOnly)
+    pagination_class = PageNumberPagination
+
+    def title_for_review(self):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
+        return title
+
+    def get_queryset(self):
+        return self.title_for_review().reviews.all()
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            title=self.title_for_review()
+        )
+
+
+class CommentViewSet(ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminAuthorOrReadOnly)
+
+    def review_for_comment(self):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
+        return review
+
+    def get_queryset(self):
+        return self.review_for_comment().comments.all()
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            review=self.review_for_comment()
+        )

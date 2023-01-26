@@ -50,14 +50,9 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'PUT':
             return Response('Метод PUT не разрешен!',
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        user = User.objects.filter(username=kwargs['username']).get()
-        serializer = self.serializer_class(
-            user,
-            data=request.data,
-            partial=True
-        )
+        user = User.objects.get(username=kwargs['username'])
+        serializer = self.serializer_class(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.validated_data.pop('role', None)
         serializer.update(user, serializer.validated_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

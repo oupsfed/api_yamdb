@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -26,6 +25,8 @@ from .serializers import (AuthSerializer,
                           GenreSerializer,
                           CategorySerializer)
 from reviews.models import Category, Genre, Review, Title
+
+from .utils import send_token
 
 User = get_user_model()
 
@@ -98,36 +99,19 @@ def auth(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
     email = serializer.validated_data['email']
-
     if (not User.objects.filter(username=username).exists()
             and User.objects.filter(email=email).exists()):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     if not User.objects.filter(username=username).exists():
         user = User.objects.create_user(username=username, email=email)
         code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Ваш код аутентификации',
-            message='Сохраните код! Он понадобится вам для получения токена.\n'
-                    f'confirmation_code:\n{code}\n'
-                    f'username: {username}',
-            from_email='admn@yamdb.com',
-            recipient_list=[email],
-            fail_silently=False,
-        )
+        send_token(code, username, email)
         return Response(serializer.data, status=status.HTTP_200_OK)
     if not User.objects.filter(username=username, email=email).exists():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     user = get_object_or_404(User, username=username, email=email)
     code = default_token_generator.make_token(user)
-    send_mail(
-        subject='Ваш код аутентификации',
-        message='Сохраните код! Он понадобится вам для получения токена.\n'
-                f'confirmation_code:\n{code}\n'
-                f'username: {username}',
-        from_email='admn@yamdb.com',
-        recipient_list=[email],
-        fail_silently=False,
-    )
+    send_token(code, username, email)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

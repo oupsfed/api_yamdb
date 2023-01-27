@@ -1,6 +1,6 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
-from rest_framework import permissions, status
 from rest_framework.exceptions import APIException
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework import status
 
 
 class GenericAPIException(APIException):
@@ -48,16 +48,11 @@ class IsAdminAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (request.method in SAFE_METHODS
                 or request.user.role == 'admin'
-                or request.user.is_superuser
+                or request.user.role == 'moderator'
                 or obj.author == request.user)
 
 
-class ReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS
-
-
-class IsAdminOrReadOnly(permissions.BasePermission):
+class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'GET':
             return True
@@ -70,7 +65,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
                 or request.user.is_superuser)
 
 
-class IsAdminOrReadOnlyTitle(permissions.BasePermission):
+class IsAdminOrReadOnlyTitle(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'GET':
             return True

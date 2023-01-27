@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = 'Displays current time'
 
     def handle(self, *args, **kwargs):
-        with open(f'static/data/category.csv', encoding='utf-8') as f:
+        with open('static/data/category.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = Category(
@@ -19,7 +19,7 @@ class Command(BaseCommand):
                     slug=row['slug']
                 )
                 data.save()
-        with open(f'static/data/users.csv', encoding='utf-8') as f:
+        with open('static/data/users.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = User(
@@ -32,7 +32,7 @@ class Command(BaseCommand):
                     last_name=row['last_name']
                 )
                 data.save()
-        with open(f'static/data/titles.csv', encoding='utf-8') as f:
+        with open('static/data/titles.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = Title(
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                     category=Category.objects.get(pk=row['category']),
                 )
                 data.save()
-        with open(f'static/data/review.csv', encoding='utf-8') as f:
+        with open('static/data/review.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = Review(
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                     pub_date=row['pub_date']
                 )
                 data.save()
-        with open(f'static/data/comments.csv', encoding='utf-8') as f:
+        with open('static/data/comments.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = Comment(
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                     pub_date=row['pub_date']
                 )
                 data.save()
-        with open(f'static/data/genre.csv', encoding='utf-8') as f:
+        with open('static/data/genre.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = Genre(
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                     slug=row['slug']
                 )
                 data.save()
-        with open(f'static/data/genre_title.csv', encoding='utf-8') as f:
+        with open('static/data/genre_title.csv', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data = GenreTitle(

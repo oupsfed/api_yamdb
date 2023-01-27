@@ -1,18 +1,17 @@
-### API для проекта Yatube.
+### API для проекта Yamdb.
 Возможности:
-- создание постов, комментариев
-- JWT-аунтефикация
-- Получения данных либо всех, либо конктреных объектов (постов, групп, комментариев)
-- Подписки на авторов, а так же просмотр своих подписок
+- создание произведений, отзывов, категорий, жанров.
+- JWT-аунтефикация по коду подтверждения через email
+- комментирование отзывов
 
 Для начала работы требуется клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone https://github.com/oupsfed/api_final_yatube.git
+git clone https://github.com/oupsfed/api_yamdb.git
 ```
 
 ```
-cd api_final_yatube
+cd api_final_yamdb
 ```
 
 Cоздать и активировать виртуальное окружение:
@@ -57,14 +56,14 @@ python3 manage.py runserver
 
 Примеры работы API:
 ```
-GET api/v1/posts
+GET api/v1/titles
 ```
 
 ```
 {
-"count": 123,
-"next": "http://api.example.org/accounts/?offset=400&limit=100",
-"previous": "http://api.example.org/accounts/?offset=200&limit=100",
+"count": 0,
+"next": "string",
+"previous": "string",
 "results": [
 {}
 ]

@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,32 +9,15 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
+from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
-from .permissions import (IsAdminAuthorOrReadOnly,
-                          IsAdmin,
-                          IsAdminOrReadOnly,
+from .permissions import (IsAdmin, IsAdminAuthorOrReadOnly, IsAdminOrReadOnly,
                           IsAdminOrReadOnlyTitle)
-from .serializers import (AuthSerializer,
-                          CommentSerializer,
-                          ReviewSerializer,
-                          TitleSerializer,
-                          CreateTitleSerializer,
-                          TokenSerializer,
-                          UserSerializer,
-                          GenreSerializer,
-                          CategorySerializer)
-from reviews.models import Category, Genre, Review, Title
-
+from .serializers import (AuthSerializer, CategorySerializer,
+                          CommentSerializer, CreateTitleSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer,
+                          TokenSerializer, UserSerializer)
 from .utils import send_token
-
-User = get_user_model()
-
-
-class ListCreateDeleteViewSet(mixins.ListModelMixin,
-                              mixins.CreateModelMixin,
-                              mixins.DestroyModelMixin,
-                              viewsets.GenericViewSet):
-    pass
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -131,7 +113,10 @@ def get_token(request):
                     status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryViewSet(ListCreateDeleteViewSet):
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -144,7 +129,10 @@ class CategoryViewSet(ListCreateDeleteViewSet):
                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GenreViewSet(ListCreateDeleteViewSet):
+class GenreViewSet(mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)

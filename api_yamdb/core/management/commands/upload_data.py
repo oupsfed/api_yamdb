@@ -3,11 +3,12 @@ import csv
 from django.core.management.base import BaseCommand
 
 from reviews.models import (Category, Comment, Genre,
-                            User, Title, Review, GenreTitle)
+                            GenreTitle, Review, Title,
+                            User)
 
 
 class Command(BaseCommand):
-    help = 'Displays current time'
+    help = 'Заполняет базу данных записями'
 
     def handle(self, *args, **kwargs):
         with open('static/data/category.csv', encoding='utf-8') as f:

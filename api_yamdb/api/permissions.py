@@ -1,6 +1,6 @@
-from rest_framework.exceptions import APIException
-from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework import status
+from rest_framework.exceptions import APIException
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class GenericAPIException(APIException):

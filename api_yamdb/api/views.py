@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -147,7 +148,8 @@ class GenreViewSet(mixins.ListModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=
+    ('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnlyTitle,)
     filter_backends = (DjangoFilterBackend,)

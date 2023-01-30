@@ -1,7 +1,5 @@
 from django.db.models import Avg
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -12,30 +10,16 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .filters import TitleFilter
-from .permissions import (IsAdminAuthorOrReadOnly,
-                          IsAdmin,
-                          IsAdminOrReadOnly,
-                          IsAdminOrReadOnlyTitle)
-from .serializers import (AuthSerializer,
-                          CommentSerializer,
-                          ReviewSerializer,
-                          TitleSerializer,
-                          CreateTitleSerializer,
-                          TokenSerializer,
-                          UserSerializer,
-                          GenreSerializer,
-                          CategorySerializer)
 from reviews.models import Category, Genre, Review, Title
-
-User = get_user_model()
-
-
-class ListCreateDeleteViewSet(mixins.ListModelMixin,
-                              mixins.CreateModelMixin,
-                              mixins.DestroyModelMixin,
-                              viewsets.GenericViewSet):
-    pass
+from users.models import User
+from .filters import TitleFilter
+from .permissions import (IsAdmin, IsAdminAuthorOrReadOnly, IsAdminOrReadOnly,
+                          IsAdminOrReadOnlyTitle)
+from .serializers import (AuthSerializer, CategorySerializer,
+                          CommentSerializer, CreateTitleSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer,
+                          TokenSerializer, UserSerializer)
+from .utils import send_token
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -99,36 +83,19 @@ def auth(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
     email = serializer.validated_data['email']
-
     if (not User.objects.filter(username=username).exists()
             and User.objects.filter(email=email).exists()):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     if not User.objects.filter(username=username).exists():
         user = User.objects.create_user(username=username, email=email)
         code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Ваш код аутентификации',
-            message='Сохраните код! Он понадобится вам для получения токена.\n'
-                    f'confirmation_code:\n{code}\n'
-                    f'username: {username}',
-            from_email='admn@yamdb.com',
-            recipient_list=[email],
-            fail_silently=False,
-        )
+        send_token(code, username, email)
         return Response(serializer.data, status=status.HTTP_200_OK)
     if not User.objects.filter(username=username, email=email).exists():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     user = get_object_or_404(User, username=username, email=email)
     code = default_token_generator.make_token(user)
-    send_mail(
-        subject='Ваш код аутентификации',
-        message='Сохраните код! Он понадобится вам для получения токена.\n'
-                f'confirmation_code:\n{code}\n'
-                f'username: {username}',
-        from_email='admn@yamdb.com',
-        recipient_list=[email],
-        fail_silently=False,
-    )
+    send_token(code, username, email)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -148,7 +115,10 @@ def get_token(request):
                     status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryViewSet(ListCreateDeleteViewSet):
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -161,7 +131,10 @@ class CategoryViewSet(ListCreateDeleteViewSet):
                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GenreViewSet(ListCreateDeleteViewSet):
+class GenreViewSet(mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -175,7 +148,8 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.annotate(rating=
+    ('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnlyTitle,)
     filter_backends = (DjangoFilterBackend,)

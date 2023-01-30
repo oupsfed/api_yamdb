@@ -1,6 +1,6 @@
-from rest_framework.exceptions import APIException
-from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework import status
+from rest_framework.exceptions import APIException
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class GenericAPIException(APIException):
@@ -17,6 +17,7 @@ class GenericAPIException(APIException):
 
 
 class UserPermission(BasePermission):
+    """Редактирование разрешено только админу, просмотр пользователю."""
     def has_permission(self, request, view):
         if view.action in ['list', 'retrieve']:
             return True
@@ -32,6 +33,7 @@ class UserPermission(BasePermission):
 
 
 class IsAdmin(BasePermission):
+    """Редактирование разрешено только админу, просмотр пользователю."""
     def has_permission(self, request, view):
         return (request.user.is_authenticated
                 and (request.user.role == 'admin'
@@ -43,8 +45,7 @@ class IsAdmin(BasePermission):
 
 
 class IsAdminAuthorOrReadOnly(BasePermission):
-    """Редектирование разрешено только админу, автору или модератору."""
-
+    """Редактирование разрешено только админу, автору или модератору."""
     def has_object_permission(self, request, view, obj):
         return (request.method in SAFE_METHODS
                 or request.user.role == 'admin'
@@ -53,8 +54,9 @@ class IsAdminAuthorOrReadOnly(BasePermission):
 
 
 class IsAdminOrReadOnly(BasePermission):
+    """Редактирование разрешено только админу, просмотр list всем."""
     def has_permission(self, request, view):
-        if request.method == 'GET':
+        if view.action in ['list']:
             return True
         return (request.user.is_authenticated
                 and (request.user.role == 'admin'
@@ -66,15 +68,16 @@ class IsAdminOrReadOnly(BasePermission):
 
 
 class IsAdminOrReadOnlyTitle(BasePermission):
+    """Редактирование разрешено только админу, просмотр list, retrieve всем."""
     def has_permission(self, request, view):
-        if request.method == 'GET':
+        if view.action in ['list', 'retrieve']:
             return True
         return (request.user.is_authenticated
                 and (request.user.role == 'admin'
                      or request.user.is_superuser))
 
     def has_object_permission(self, request, view, obj):
-        if request.method == 'GET':
+        if view.action in ['list', 'retrieve']:
             return True
         return (request.user.role == 'admin'
                 or request.user.is_superuser)

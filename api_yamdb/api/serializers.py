@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Avg
 from rest_framework.serializers import (CharField, CurrentUserDefault,
                                         EmailField, IntegerField,
                                         ModelSerializer, RegexField,
                                         SlugRelatedField, Serializer,
                                         ValidationError)
+
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import (Category, Comment, Genre,
-                            GenreTitle, Review, Title)
+from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 
 User = get_user_model()
 

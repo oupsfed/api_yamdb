@@ -1,5 +1,4 @@
 from django.db import models
-
 from users.models import User
 
 SCORES = ((1, 1), (2, 2), (3, 3), (4, 4),
@@ -37,7 +36,7 @@ class Title(models.Model):
     genre = models.ManyToManyField(Genre, through='GenreTitle')
 
     def __str__(self):
-        return self.name  # [:15]
+        return self.name
 
 
 class GenreTitle(models.Model):

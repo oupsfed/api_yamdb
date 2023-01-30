@@ -83,10 +83,11 @@ def auth(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
     email = serializer.validated_data['email']
-    if (not User.objects.filter(username=username).exists()
-            and User.objects.filter(email=email).exists()):
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     if not User.objects.filter(username=username).exists():
+        if User.objects.filter(email=email).exists():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.create_user(username=username, email=email)
         code = default_token_generator.make_token(user)
         send_token(code, username, email)
@@ -148,8 +149,7 @@ class GenreViewSet(mixins.ListModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=
-    ('reviews__score'))
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnlyTitle,)
     filter_backends = (DjangoFilterBackend,)

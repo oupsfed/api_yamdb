@@ -1,10 +1,9 @@
-from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import (CharField, CurrentUserDefault,
                                         EmailField, IntegerField,
                                         ModelSerializer, RegexField,
                                         SlugRelatedField, Serializer,
-                                        SerializerMethodField, ValidationError)
+                                        ValidationError)
 from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (Category, Comment, Genre,
@@ -71,7 +70,7 @@ class GenreSerializer(ModelSerializer):
 class TitleSerializer(ModelSerializer):
     genre = GenreSerializer(required=False, many=True)
     category = CategorySerializer()
-    rating = SerializerMethodField()
+    rating = IntegerField(read_only=True)
     year = IntegerField(required=False, allow_null=True)
 
     class Meta:
@@ -91,10 +90,6 @@ class TitleSerializer(ModelSerializer):
             )
         ]
 
-    def get_rating(self, obj):
-        rating = obj.reviews.all().aggregate(Avg('score'))['score__avg']
-        return rating
-
 
 class CreateTitleSerializer(ModelSerializer):
     genre = SlugRelatedField(slug_field='slug',
@@ -103,7 +98,6 @@ class CreateTitleSerializer(ModelSerializer):
                                         required=False)
     category = SlugRelatedField(slug_field='slug',
                                 queryset=Category.objects.all())
-    rating = SerializerMethodField()
 
     class Meta:
         fields = ('id',
@@ -111,8 +105,7 @@ class CreateTitleSerializer(ModelSerializer):
                   'year',
                   'description',
                   'genre',
-                  'category',
-                  'rating')
+                  'category',)
         model = Title
         validators = [
             UniqueTogetherValidator(
@@ -121,9 +114,6 @@ class CreateTitleSerializer(ModelSerializer):
                 message='Данное произведение существует'
             )
         ]
-
-    def get_rating(self, obj):
-        pass
 
     def create(self, validated_data):
         if 'genre' not in self.initial_data:

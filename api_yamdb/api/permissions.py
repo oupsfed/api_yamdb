@@ -36,7 +36,7 @@ class IsAdmin(BasePermission):
     """Редактирование разрешено только админу, просмотр пользователю."""
     def has_permission(self, request, view):
         return (request.user.is_authenticated
-                and (request.user.role == 'admin'
+                and (request.user.role == request.user.Role.ADMIN
                      or request.user.is_superuser))
 
     def has_object_permission(self, request, view, obj):
@@ -48,8 +48,8 @@ class IsAdminAuthorOrReadOnly(BasePermission):
     """Редактирование разрешено только админу, автору или модератору."""
     def has_object_permission(self, request, view, obj):
         return (request.method in SAFE_METHODS
-                or request.user.role == 'admin'
-                or request.user.role == 'moderator'
+                or request.user.role == request.user.Role.ADMIN
+                or request.user.role == request.user.Role.MODERATOR
                 or obj.author == request.user)
 
 
@@ -59,11 +59,11 @@ class IsAdminOrReadOnly(BasePermission):
         if view.action in ['list']:
             return True
         return (request.user.is_authenticated
-                and (request.user.role == 'admin'
+                and (request.user.role == request.user.Role.ADMIN
                      or request.user.is_superuser))
 
     def has_object_permission(self, request, view, obj):
-        return (request.user.role == 'admin'
+        return (request.user.role == request.user.Role.ADMIN
                 or request.user.is_superuser)
 
 
@@ -73,11 +73,11 @@ class IsAdminOrReadOnlyTitle(BasePermission):
         if view.action in ['list', 'retrieve']:
             return True
         return (request.user.is_authenticated
-                and (request.user.role == 'admin'
+                and (request.user.role == request.user.Role.ADMIN
                      or request.user.is_superuser))
 
     def has_object_permission(self, request, view, obj):
         if view.action in ['list', 'retrieve']:
             return True
-        return (request.user.role == 'admin'
+        return (request.user.role == request.user.Role.ADMIN
                 or request.user.is_superuser)

@@ -83,7 +83,6 @@ def auth(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
     email = serializer.validated_data['email']
-
     if not User.objects.filter(username=username).exists():
         if User.objects.filter(email=email).exists():
             return Response(serializer.errors,
